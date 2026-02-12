@@ -12,7 +12,7 @@ export async function getRepoStatus(req, res, next) {
 
     const commits = await getRepoCommits(owner, repo);
 
-    // group by author
+    // group by author //
     const grouped = {};
 
     commits.forEach((commit) => {
