@@ -19,9 +19,9 @@ export async function generateStandup(repoData) {
     .trim();
 
   const prompt = `
-You are a senior engineering manager.
+ You are a senior engineering manager.
 
-Based on the following multi-repository commits, generate a concise, professional team standup update.
+ Based on the following multi-repository commits, generate a concise, professional team standup update.
 
 Guidelines:
 - Be outcome-focused
@@ -73,4 +73,39 @@ Risks:
       stack: err.stack,
     });
   }
+}
+// 🟢 2. Developer Specific Summary
+export async function generateDeveloperSummary(repoData, query) {
+  const { commitsByAuthor } = repoData;
+
+  const formattedCommits = Object.entries(commitsByAuthor)
+    .map(([author, commits]) => {
+      const commitText = commits.map((msg) => `- ${msg}`).join("\n");
+      return `Developer: ${author}\n${commitText}`;
+    })
+    .join("\n\n");
+
+  const prompt = `
+You are a senior engineering manager.
+ 
+Here are the recent commits grouped by developer:
+ 
+${formattedCommits}
+ 
+User Question:
+"${query}"
+ 
+Instructions:
+- Identify which developer the user is referring to (even if nickname or partial name is used)
+- Explain clearly what work that developer did
+- Keep answer concise and professional
+`;
+
+  const response = await axios.post("http://localhost:11434/api/generate", {
+    model: "llama3",
+    prompt,
+    stream: false,
+  });
+
+  return response.data.response;
 }
